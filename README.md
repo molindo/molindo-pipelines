@@ -21,17 +21,17 @@ Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipeli
 - `BAMBOO_USER` - user name of a Bamboo user with admin privileges (required to create branches)
 - `BAMBOO_PASS` - password for Bamboo user
 
-### Add bitbucket-pipelines.yml 
+### Add bitbucket-pipelines.yml
 
 ```yml
-image: molindo/molindo-pipelines-nodejs:7
+image: molindo/molindo-pipelines:maven-3-jdk-8
 
 pipelines:
   default:
     - step:
         script:
-          - yarn install
-          - npm run build
+          - maven clean verify
+          - cd target/
           - dockerBuild.sh
           - triggerBamboo.sh
 
