@@ -27,7 +27,7 @@ else
 
     if [ -z "${branchKey}" ]; then
             echo "creating new branch ${branch} of plan ${plan}"
-            branchKey=$( curl -s --user "${user}:${pass}" -H 'Accept: application/json' -XPUT ${bamboo}/rest/api/latest/plan/${plan}/branch/${branch} | jshon -e key -u )
+            branchKey=$( curl -s --user "${user}:${pass}" -H 'Accept: application/json' -XPUT "${bamboo}/rest/api/latest/plan/${plan}/branch/${branch}?vcsBranch=${branch}&enabled=true&cleanupEnabled=true" | jshon -e key -u )
     fi
 fi
 
