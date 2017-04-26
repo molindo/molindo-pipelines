@@ -1,4 +1,4 @@
-FROM node:7
+FROM atlassian/default-image:latest
 
 RUN apt-get update \
         && apt-get install -y jshon python-pip python-dev \
