@@ -1,4 +1,4 @@
-FROM node:7.9.0
+FROM node:7
 
 RUN apt-get update \
         && apt-get install -y jshon python-pip python-dev \
