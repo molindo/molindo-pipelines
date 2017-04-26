@@ -1,4 +1,4 @@
-# molindo-pipelines-nodejs
+# molindo-pipelines
 
 Container for use as Bitbucket Pipelines image
 
@@ -7,7 +7,7 @@ Container for use as Bitbucket Pipelines image
 
 ## Registry
 
-Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipelines-nodejs/)
+Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipelines/)
 
 ## Usage
 
