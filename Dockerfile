@@ -12,7 +12,7 @@ RUN git clone --depth=1 --branch v1.4.5.RELEASE https://github.com/spring-projec
             -s /usr/share/maven/ref/settings-docker.xml \
             -f /tmp/spring-boot/spring-boot-samples/pom.xml \
             --projects .,spring-boot-sample-data-jpa,spring-boot-sample-data-rest,spring-boot-sample-secure-oauth2 \
-            dependency:resolve \
+            dependency:resolve dependency:resolve-plugins \
         && rm -r /tmp/spring-boot
 
 ADD bin /usr/local/bin
