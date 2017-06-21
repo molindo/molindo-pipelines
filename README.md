@@ -23,6 +23,7 @@ Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipeli
 - `BAMBOO_PASS` - password for Bamboo user
 - `BITBUCKET_BRANCH` - current branch name
 - `BITBUCKET_REPO_SLUG` - slug of the repository name
+- `DEFAULT_BRANCHES` - a space separated list of branches that will publish stable releases when built upon (e.g. `master 1.x`)
 
 ### Add bitbucket-pipelines.yml
 
