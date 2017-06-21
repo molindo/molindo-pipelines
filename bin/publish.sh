@@ -50,3 +50,10 @@ npm --no-git-tag-version version $newVersion
 # publish
 tag=$([ $isDefaultBranch == true ] && echo "latest" || echo "prerelease")
 npm publish --tag $tag
+
+# tag release
+if [ $isDefaultBranch == true ]; then
+  echo "tagging version $newVersion"
+  git tag $newVersion
+  git push origin $newVersion
+fi

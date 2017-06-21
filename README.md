@@ -24,6 +24,9 @@ Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipeli
 - `BITBUCKET_BRANCH` - current branch name
 - `BITBUCKET_REPO_SLUG` - slug of the repository name
 - `DEFAULT_BRANCHES` - a space separated list of branches that will publish stable releases when built upon (e.g. `master 1.x`)
+- `GIT_USER_NAME` - user name of a git user that has push access to the repository
+- `GIT_USER_EMAIL` - email of a git user that has push access to the repository
+
 
 ### Add bitbucket-pipelines.yml
 
@@ -34,6 +37,7 @@ pipelines:
   default:
     - step:
         script:
+          - initRepo.sh
           - yarn install
           - npm run build
           - dockerBuild.sh
