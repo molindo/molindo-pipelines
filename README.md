@@ -20,6 +20,10 @@ Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipeli
 - `BAMBOO_PLAN` - the Bamboo plan key (e.g. "FOO-BAR")
 - `BAMBOO_USER` - user name of a Bamboo user with admin privileges (required to create branches)
 - `BAMBOO_PASS` - password for Bamboo user
+- `BITBUCKET_BRANCH` - current branch name
+- `BITBUCKET_REPO_SLUG` - slug of the repository name
+- `GIT_USER_NAME` - user name of a git user that has push access to the repository
+- `GIT_USER_EMAIL` - email of a git user that has push access to the repository
 
 ### Add bitbucket-pipelines.yml
 
@@ -30,6 +34,7 @@ pipelines:
   default:
     - step:
         script:
+          - initRepo.sh
           - maven clean verify
           - cd target/
           - dockerBuild.sh
