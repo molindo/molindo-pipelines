@@ -29,14 +29,14 @@ Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipeli
 ### Add bitbucket-pipelines.yml
 
 ```yml
-image: molindo/molindo-pipelines:latest
+image: molindo/molindo-pipelines:cypress
 
 pipelines:
   default:
     - step:
         script:
           - initRepo.sh
-          - ...
+          - $(npm bin)/cypress verify
           - dockerBuild.sh
           - triggerBamboo.sh
 

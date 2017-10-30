@@ -1,4 +1,4 @@
-FROM atlassian/default-image:latest
+FROM cypress/base:8
 
 RUN apt-get update \
         && apt-get install -y jshon python-pip python-dev \
