@@ -1,5 +1,7 @@
 FROM cypress/base:8
 
+USER root
+
 RUN apt-get update \
         && apt-get install -y jshon python-pip python-dev \
         && pip install awscli \
@@ -7,3 +9,5 @@ RUN apt-get update \
         && rm -rf /var/lib/apt/lists/*
 
 ADD bin /usr/local/bin
+
+USER person
