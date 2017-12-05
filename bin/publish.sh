@@ -24,7 +24,6 @@ case `branchType $branch` in
   isDefaultBranch=false
   ;;
 esac
-echo $isDefaultBranch
 
 # read current version
 version=$(npm show $repoSlug version)
