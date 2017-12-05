@@ -1,4 +1,4 @@
-FROM node:7
+FROM node:8
 
 RUN apt-get update \
         && apt-get install -y jshon python-pip python-dev \
