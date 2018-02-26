@@ -20,7 +20,7 @@ if [ `echo $registry | grep 'ecr\.[^.]*\.amazonaws\.com$'` ]; then
 
 	region=`echo $registry | sed -e 's/^.*\.\([^.]*\)\.amazonaws\.com$/\1/g'`
 	echo "logging in to AWS ECR in $region"
-	$( aws --region $region ecr get-login )
+	$( aws --region $region ecr get-login --no-include-email )
 fi
 
 echo "building $target"
