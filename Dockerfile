@@ -7,3 +7,4 @@ RUN apt-get update \
         && rm -rf /var/lib/apt/lists/*
 
 ADD bin /usr/local/bin
+ADD profile /etc/profile.d

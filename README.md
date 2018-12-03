@@ -26,7 +26,8 @@ Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipeli
 - `DEFAULT_BRANCHES` - a space separated list of branches that will publish stable releases when built upon (e.g. `master 1.x`)
 - `GIT_USER_NAME` - user name of a git user that has push access to the repository
 - `GIT_USER_EMAIL` - email of a git user that has push access to the repository
-
+- `NPM_BUILD_USER` - npm registry user
+- `NPM_BUILD_PASS` - npm registry password
 
 ### Add bitbucket-pipelines.yml
 
@@ -37,6 +38,7 @@ pipelines:
   default:
     - step:
         script:
+          - . /etc/profile
           - initRepo.sh
           - yarn install
           - npm run build
