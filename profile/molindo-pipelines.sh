@@ -1,9 +1,9 @@
 #!/bin/bash -e
 
-if [ -n "$NPM_BUILD_USER" ] && [ -n "$NPM_BUILD_PASS" ]; then
-    echo "exporting NPM_BUILD_AUTH for user $NPM_BUILD_USER"
-    export NPM_BUILD_AUTH=$( echo -n "${NPM_BUILD_USER}:${NPM_BUILD_PASS}" | openssl base64 )
-elif [ -n "$NPM_BUILD_AUTH" ]; then
-    echo "NPM_BUILD_AUTH not available"
+if [ -n "$NPM_REGISTRY_USER" ] && [ -n "$NPM_REGISTRY_PASS" ]; then
+    echo "exporting NPM_REGISTRY_AUTH for user $NPM_REGISTRY_USER"
+    export NPM_REGISTRY_AUTH=$( echo -n "${NPM_REGISTRY_USER}:${NPM_REGISTRY_PASS}" | openssl base64 )
+elif [ -n "$NPM_REGISTRY_AUTH" ]; then
+    echo "NPM_REGISTRY_AUTH not available"
     exit 1
 fi
