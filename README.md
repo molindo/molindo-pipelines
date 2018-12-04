@@ -21,13 +21,21 @@ Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipeli
 - `BAMBOO_PLAN` - the Bamboo plan key (e.g. "FOO-BAR")
 - `BAMBOO_USER` - user name of a Bamboo user with admin privileges (required to create branches)
 - `BAMBOO_PASS` - password for Bamboo user
-- `BITBUCKET_BRANCH` - current branch name
-- `BITBUCKET_REPO_SLUG` - slug of the repository name
 - `DEFAULT_BRANCHES` - a space separated list of branches that will publish stable releases when built upon (e.g. `master 1.x`)
 - `GIT_USER_NAME` - user name of a git user that has push access to the repository
 - `GIT_USER_EMAIL` - email of a git user that has push access to the repository
 - `NPM_REGISTRY_USER` - npm registry user
 - `NPM_REGISTRY_PASS` - npm registry password
+- `NPM_REGISTRY_EMAIL` - npm registry email
+
+### Expected Pipelines variables:
+
+- `BITBUCKET_REPO_OWNER` - repository owner
+- `BITBUCKET_REPO_SLUG` - slug of the repository name
+- `BITBUCKET_BRANCH` - current branch name
+- `BITBUCKET_COMMIT` - current commit id
+
+(see ["Variables in Pipelines"](https://confluence.atlassian.com/bitbucket/variables-in-pipelines-794502608.html))
 
 ### Add bitbucket-pipelines.yml
 
