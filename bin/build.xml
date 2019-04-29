@@ -22,7 +22,6 @@
 	<property name="defaultQualifier" value="SNAPSHOT" />
 	<property name="defaultCopiedPOMFilename" value="pom-versioned.xml" />
 	<property name="defaultBuildtoolFilter" value="[Buildtool]" />
-	<property name="containerTagFileName" value="container-tags.txt" />
 
 	<!-- usage -->
 	<target name="help" description="print usage info">
@@ -39,10 +38,6 @@
 
 	<!-- actions to be executed for master -->
 	<target name="buildDefault" if="isDefaultBranch">
-		<condition property="docker.branch" value="latest" else="${git.branch}">
-			<equals arg1="master" arg2="${git.branch}" />
-		</condition>
-
 		<echo message="triggering CI build for default branch ${git.branch}" />
 
 		<antcall target="tagAndSetVersion">
@@ -58,10 +53,6 @@
 		</antcall>
 
 		<antcall target="updateAndPushDependencies" />
-
-		<antcall target="writeContainerTags">
-			<param name="tags" value="${docker.image}:${build.version.tag}${line.separator}${docker.image}:${docker.branch}" />
-		</antcall>
 	</target>
 
 	<!-- actions to be executed when operating within a development branch -->
@@ -78,10 +69,6 @@
 
 		<antcall target="setVersion">
 			<param name="version" value="${build.version.default}" />
-		</antcall>
-
-		<antcall target="writeContainerTags">
-			<param name="tags" value="${docker.image}:${build.version.tag}${line.separator}${docker.image}:${git.branch}" />
 		</antcall>
 	</target>
 
@@ -110,7 +97,6 @@
 		<!-- {default,git}.branch can be provided by pom.xml or from CLI, default is master -->
 		<property name="default.branch" value="master" />
 		<property name="git.branch" value="master" />
-		<property name="docker.image" value="${project.artifactId}" />
 
 		<!-- determine if we're working on a default branch -->
 		<condition property="isDefaultBranch">
@@ -251,13 +237,4 @@
 		</exec>
 	</target>
 
-	<!-- write container tags ${tags} -->
-	<target name="writeContainerTags">
-		<!-- cleanup of old tagfiles (broken builds) -->
-		<exec executable="rm" failonerror="true">
-			<arg value="-rf" />
-			<arg value="*${containerTagFileName}" />
-		</exec>
-		<echo file="${docker.image}-${containerTagFileName}" append="false">${tags}</echo>
-	</target>
 </project>

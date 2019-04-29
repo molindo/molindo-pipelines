@@ -22,6 +22,7 @@ Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipeli
 - `BAMBOO_PASS` - password for Bamboo user
 - `BITBUCKET_BRANCH` - current branch name
 - `BITBUCKET_REPO_SLUG` - slug of the repository name
+- `BITBUCKET_BUILD_NUMBER` - current build number
 - `GIT_USER_NAME` - user name of a git user that has push access to the repository
 - `GIT_USER_EMAIL` - email of a git user that has push access to the repository
 
