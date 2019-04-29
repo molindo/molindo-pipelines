@@ -3,7 +3,7 @@
 cd /tmp
 
 # initialize local repository with spring-boot-samples
-for tag in v1.4.{2..6}.RELEASE v1.5.{0..3}.RELEASE; do
+for tag in v1.4.6.RELEASE v1.5.16.RELEASE; do
     git clone --depth=1 --branch $tag https://github.com/spring-projects/spring-boot.git spring-boot
     (
         cd spring-boot/spring-boot-samples

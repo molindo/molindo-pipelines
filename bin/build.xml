@@ -1,0 +1,237 @@
+<?xml version="1.0"?>
+<!--
+	Usage from other directory: ant -f ../buildtools/build.xml -Dbasedir=. -DincrementalVersion=42 help
+
+	Prerequisites for usage:
+	- parent SHOULD be latest molindo-private-pom
+	- version MUST be in the form of *.*.9999-SNAPSHOT
+	- <scm> MUST is propertly configured (including write access)
+	- pom-versioned.xml SHOULD be in .gitignore
+-->
+<project name="Build config" default="help">
+
+	<!-- mandatory parameters -->
+	<property name="incrementalVersion" value="" />
+
+	<!-- optional and const parameters -->
+	<property name="mvn" value="mvn" />
+	<property name="branch" value="master" />
+	<property name="deleteProperties" value="true" />
+	<property name="pushChanges" value="true" />
+	<property name="defaultIncrementalVersion" value="9999" />
+	<property name="defaultQualifier" value="SNAPSHOT" />
+	<property name="defaultCopiedPOMFilename" value="pom-versioned.xml" />
+	<property name="defaultBuildtoolFilter" value="[Buildtool]" />
+
+	<!-- usage -->
+	<target name="help" description="print usage info">
+		<echo message="ant -f ../buildtools/build.xml -Dbasedir=. -DincrementalVersion=42 dist" />
+		<echo message="" />
+		<echo message="required: incrementalVersion" />
+	</target>
+
+	<!-- main CI task to be called by build environment -->
+	<target name="dist" depends="initialize" description="build and deploy Maven project">
+		<antcall target="buildDefault" />
+		<antcall target="buildBranch" />
+	</target>
+
+	<!-- actions to be executed for master -->
+	<target name="buildDefault" if="isDefaultBranch">
+		<echo message="triggering CI build for default branch ${git.branch}" />
+
+		<antcall target="tagAndSetVersion">
+			<param name="version" value="${build.version.release}" />
+		</antcall>
+
+		<antcall target="copyPOM" />
+
+		<antcall target="deploy" />
+
+		<antcall target="setVersion">
+			<param name="version" value="${build.version.default}" />
+		</antcall>
+
+		<antcall target="updateAndPushDependencies" />
+	</target>
+
+	<!-- actions to be executed when operating within a development branch -->
+	<target name="buildBranch" if="isFeatureBranch">
+		<echo message="triggering CI build for feature branch ${git.branch}" />
+
+		<antcall target="setVersion">
+			<param name="version" value="${build.version.release}" />
+		</antcall>
+
+		<antcall target="copyPOM" />
+
+		<antcall target="deploy" />
+
+		<antcall target="setVersion">
+			<param name="version" value="${build.version.default}" />
+		</antcall>
+	</target>
+
+	<!-- load properties from POM -->
+	<target name="properties">
+		<tempfile property="build.properties" prefix="build" suffix=".properties" destDir="${java.io.tmpdir}" deleteonexit="${deleteProperties}" />
+
+		<!-- write properties to ${build.properties} -->
+		<exec executable="${mvn}" failonerror="true">
+			<arg value="--batch-mode" />
+			<arg value="--settings=settings.xml" />
+			<arg value="-Ddeployment=true" />
+			<arg value="-Dbuild.properties=${build.properties}" />
+			<arg value="initialize" />
+			<arg value="properties:write-project-properties" />
+		</exec>
+
+		<!-- load properties from ${build.properties} -->
+		<echo message="using build properties from ${build.properties}" />
+		<loadproperties srcFile="${build.properties}" />
+	</target>
+
+	<!-- check and set required properties -->
+	<target name="initialize" depends="properties">
+
+		<!-- {default,git}.branch can be provided by pom.xml or from CLI, default is master -->
+		<property name="default.branch" value="master" />
+		<property name="git.branch" value="master" />
+
+		<!-- determine if we're working on a default branch -->
+		<condition property="isDefaultBranch">
+			<equals arg1="${default.branch}" arg2="${git.branch}" />
+		</condition>
+
+		<!-- check if we're working on a feature branch -->
+		<condition property="isFeatureBranch">
+			<!-- we assume that everything that isn't default is a feature branch -->
+			<isfalse value="${isDefaultBranch}" />
+		</condition>
+
+		<!-- we're either on a default branch or a feature branch -->
+		<fail message="build must be either default or feature">
+			<condition>
+				<not>
+					<xor>
+						<istrue value="${isDefaultBranch}" />
+						<istrue value="${isFeatureBranch}" />
+					</xor>
+				</not>
+			</condition>
+		</fail>
+
+		<!-- check for required properties -->
+		<fail message="incrementalVersion not set for default build">
+			<condition>
+				<and>
+					<istrue value="${isDefaultBranch}" />
+					<equals arg1="${incrementalVersion}" arg2="" trim="true" />
+				</and>
+			</condition>
+		</fail>
+
+		<!-- set properties -->
+		<property name="build.version.default" value="${build.majorVersion}.${build.minorVersion}.${defaultIncrementalVersion}-${defaultQualifier}" />
+		<property name="build.version.current" value="${build.majorVersion}.${build.minorVersion}.${build.incrementalVersion}-${build.qualifier}" />
+
+		<!-- set default branch properties -->
+		<condition property="build.version.release" value="${build.majorVersion}.${build.minorVersion}.${incrementalVersion}">
+			<istrue value="${isDefaultBranch}" />
+		</condition>
+		<condition property="build.version.tag" value="${build.version.release}">
+			<istrue value="${isDefaultBranch}" />
+		</condition>
+
+		<!-- set feature branch properties -->
+		<condition property="build.version.release" value="${build.majorVersion}.${build.minorVersion}.${defaultIncrementalVersion}-${git.branch}-${defaultQualifier}">
+			<istrue value="${isFeatureBranch}" />
+		</condition>
+		<condition property="build.version.tag" value="${build.majorVersion}.${build.minorVersion}.${defaultIncrementalVersion}-${git.branch}-${incrementalVersion}">
+			<istrue value="${isFeatureBranch}" />
+		</condition>
+
+		<!-- check for expected version format -->
+		<fail message="version must be equal to x.x.${defaultIncrementalVersion}-${defaultQualifier} but was ${build.version.current}">
+			<condition>
+				<not>
+					<equals arg1="${build.version.default}" arg2="${build.version.current}" casesensitive="true" trim="false" />
+				</not>
+			</condition>
+		</fail>
+
+		<!-- debug output -->
+		<echoproperties />
+		<echo message="releasing version ${build.version.release} from ${build.version.default}" />
+	</target>
+
+	<!-- deploy Maven artifact -->
+	<target name="deploy">
+		<echo message="deploying maven artifact" />
+		<exec executable="${mvn}" failonerror="true">
+			<arg value="--batch-mode" />
+			<arg value="--settings=settings.xml" />
+			<arg value="-Ddeployment=true" />
+			<arg value="--update-snapshots" />
+			<arg value="clean" />
+			<arg value="deploy" />
+			<arg value="at.molindo:molindo-maven-fetchdeployed:0.0.4:fetch" />
+		</exec>
+	</target>
+
+	<!-- tag and set version ${version} -->
+	<target name="tagAndSetVersion">
+		<echo message="tagging version ${version}" />
+		<exec executable="${mvn}" failonerror="true">
+			<arg value="--batch-mode" />
+			<arg value="--settings=settings.xml" />
+			<arg value="scm:check-local-modification" />
+			<arg value="-Dscm.checkLocalModification.skip=${isFeatureBranch}" />
+			<arg value="scm:tag" />
+			<arg value="-DpushChanges=${pushChanges}" />
+			<arg value="-Dtag=${version}" />
+		</exec>
+		<antcall target="setVersion">
+			<param name="version" value="${version}" />
+		</antcall>
+	</target>
+
+	<!-- set version ${version} -->
+	<target name="setVersion">
+		<echo message="setting POM version ${version}" />
+		<exec executable="${mvn}" failonerror="true">
+			<arg value="--batch-mode" />
+			<arg value="--settings=settings.xml" />
+			<arg value="versions:set" />
+			<arg value="-DnewVersion=${version}" />
+		</exec>
+	</target>
+
+	<!-- create a backup copy of the versioned pom -->
+	<target name="copyPOM">
+		<copy file="pom.xml" tofile="${defaultCopiedPOMFilename}" failonerror="true" />
+	</target>
+
+	<!-- check if there are updated libraries we're referencing and push the update -->
+	<target name="updateAndPushDependencies">
+		<exec executable="${mvn}" failonerror="true">
+			<arg value="--batch-mode" />
+			<arg value="--settings=settings.xml" />
+			<arg value="scm:check-local-modification" />
+			<arg value="versions:update-parent" />
+		</exec>
+		<exec executable="${mvn}" failonerror="true">
+			<arg value="--batch-mode" />
+			<arg value="--settings=settings.xml" />
+			<arg value="versions:use-latest-releases" />
+		</exec>
+		<exec executable="${mvn}" failonerror="true">
+			<arg value="--batch-mode" />
+			<arg value="--settings=settings.xml" />
+			<arg value="scm:checkin" />
+			<arg value="-Dmessage=${defaultBuildtoolFilter} updated internal dependencies" />
+			<arg value="-DpushChanges=${pushChanges}" />
+		</exec>
+	</target>
+
+</project>
