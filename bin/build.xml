@@ -109,9 +109,6 @@
 			<isfalse value="${isDefaultBranch}" />
 		</condition>
 
-		<!-- check if pipelines is building -->
-		<available file="bitbucket-pipelines.yml" property="isPipelinesBuild" />
-
 		<!-- we're either on a default branch or a feature branch -->
 		<fail message="build must be either default or feature">
 			<condition>
@@ -169,7 +166,7 @@
 	</target>
 
 	<!-- deploy Maven artifact -->
-	<target name="deploy" unless="isPipelinesBuild">
+	<target name="deploy">
 		<echo message="deploying maven artifact" />
 		<exec executable="${mvn}" failonerror="true">
 			<arg value="--batch-mode" />
