@@ -27,12 +27,34 @@ Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipeli
 
 ### Add bitbucket-pipelines.yml
 
+For libraries:
+
 ```yml
 image: molindo/molindo-pipelines:maven-3-jdk-8
 
 pipelines:
   default:
     - step:
+        caches:
+          - maven
+        script:
+          - initRepo.sh
+          - deploy.sh
+```
+
+For containers:
+
+```yml
+image: molindo/molindo-pipelines:maven-3-jdk-8
+
+clone:
+  depth: full
+
+pipelines:
+  default:
+    - step:
+        caches:
+          - maven
         script:
           - initRepo.sh
           - maven clean verify
