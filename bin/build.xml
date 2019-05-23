@@ -175,7 +175,7 @@
 			<arg value="--update-snapshots" />
 			<arg value="clean" />
 			<arg value="deploy" />
-			<arg value="at.molindo:molindo-maven-fetchdeployed:1.0.5:fetch" />
+			<arg value="at.molindo:molindo-maven-fetchdeployed:1.0.6:fetch" />
 		</exec>
 	</target>
 
