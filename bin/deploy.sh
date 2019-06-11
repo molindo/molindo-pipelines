@@ -1,11 +1,9 @@
 #!/bin/bash -e
 
-branch=${BITBUCKET_BRANCH?}
-owner=${BITBUCKET_REPO_OWNER?}
-slug=${BITBUCKET_REPO_SLUG?}
+# force env variables used by awscli
+key=${AWS_ACCESS_KEY_ID?}
+secret=${AWS_SECRET_ACCESS_KEY?}
 
-version=$( /usr/local/bin/buildNumber.sh "${owner}/${slug}:${branch}" )
+echo "building branch ${branch}"
 
-echo "building branch ${branch} with version ${version}"
-
-ant -f /usr/local/bin/build.xml -Dbasedir=. -Dgit.branch=${branch} -DincrementalVersion=${version} -Dmvn=/usr/bin/mvn dist
+ant -f /usr/local/bin/build.xml -Dbasedir=. -Dgit.branch=${branch} -Dmvn=/usr/bin/mvn -Daws=/usr/local/bin/aws dist

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-	Usage from other directory: ant -f ../buildtools/build.xml -Dbasedir=. -DincrementalVersion=42 help
+	Usage from other directory: ant -f ../buildtools/build.xml -Dbasedir=. help
 
 	Prerequisites for usage:
 	- parent SHOULD be latest molindo-private-pom
@@ -10,10 +10,8 @@
 -->
 <project name="Build config" default="help">
 
-	<!-- mandatory parameters -->
-	<property name="incrementalVersion" value="" />
-
 	<!-- optional and const parameters -->
+	<property name="aws" value="aws" />
 	<property name="mvn" value="mvn" />
 	<property name="branch" value="master" />
 	<property name="deleteProperties" value="true" />
@@ -25,9 +23,7 @@
 
 	<!-- usage -->
 	<target name="help" description="print usage info">
-		<echo message="ant -f ../buildtools/build.xml -Dbasedir=. -DincrementalVersion=42 dist" />
-		<echo message="" />
-		<echo message="required: incrementalVersion" />
+		<echo message="ant -f ../buildtools/build.xml -Dbasedir=. dist" />
 	</target>
 
 	<!-- main CI task to be called by build environment -->
@@ -120,6 +116,11 @@
 				</not>
 			</condition>
 		</fail>
+
+		<!-- get incrementalVersion from DynamoDB -->
+		<antcall target="getIncrementalVersion">
+			<param name="key" value="${project.groupId}:${project.artifactId}:${build.majorVersion}.${build.minorVersion}" />
+		</antcall>
 
 		<!-- check for required properties -->
 		<fail message="incrementalVersion not set for default build">
@@ -232,6 +233,37 @@
 			<arg value="-Dmessage=${defaultBuildtoolFilter} updated internal dependencies" />
 			<arg value="-DpushChanges=${pushChanges}" />
 		</exec>
+	</target>
+
+
+	<!-- get incremental version ${version} -->
+	<target name="getIncrementalVersion" if="isFetchIncrementalVersion" depends="fetchIncrementalVersion">
+		<exec executable="${aws}" failonerror="true" outputproperty="incrementalVersion" error="/tmp/ant-error.log">
+			<arg value="--region=eu-central-1" />
+			<arg value="dynamodb" />
+			<arg value="update-item" />
+			<arg value="--table-name=pipelines-versions" />
+			<arg value="--return-values=ALL_NEW" />
+			<arg value="--key={&quot;artifact&quot;: {&quot;S&quot;: &quot;${key}&quot;}}" />
+			<arg value="--expression-attribute-names={&quot;#V&quot;:&quot;version&quot;}" />
+			<arg value="--expression-attribute-values={&quot;:one&quot;: {&quot;N&quot;: &quot;1&quot;}}" />
+			<arg value="--update-expression=ADD #V :one" />
+			<arg value="--query=Attributes.version.N" />
+			<arg value="--output=text" />
+		</exec>
+		<echo message="use incrementalVersion ${incrementalVersion} for ${key}" />
+	</target>
+
+	<!-- check if incrementalVersion should be fetched -->
+	<target name="fetchIncrementalVersion">
+		<condition property="isFetchIncrementalVersion">
+			<and>
+				<istrue value="${isDefaultBranch}" />
+				<not>
+					<isset property="incrementalVersion" />
+				</not>
+			</and>
+		</condition>
 	</target>
 
 </project>
