@@ -1,7 +1,10 @@
 #!/bin/bash -e
 
 branch=${BITBUCKET_BRANCH?}
-version=${BITBUCKET_BUILD_NUMBER?}
+owner=${BITBUCKET_REPO_OWNER?}
+slug=${BITBUCKET_REPO_SLUG?}
+
+version=$( /usr/local/bin/buildNumber.sh "${owner}/${slug}:${branch}" )
 
 echo "building branch ${branch} with version ${version}"
 
