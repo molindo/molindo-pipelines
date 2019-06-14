@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-	Usage from other directory: ant -f ../buildtools/build.xml -Dbasedir=. -DincrementalVersion=42 help
+	Usage from other directory: ant -f ../buildtools/build.xml -Dbasedir=. help
 
 	Prerequisites for usage:
 	- parent SHOULD be latest molindo-private-pom
@@ -8,12 +8,10 @@
 	- <scm> MUST is propertly configured (including write access)
 	- pom-versioned.xml SHOULD be in .gitignore
 -->
-<project name="Build config" default="help">
-
-	<!-- mandatory parameters -->
-	<property name="incrementalVersion" value="" />
+<project name="Build config" default="help" xmlns:if="ant:if" xmlns:unless="ant:unless">
 
 	<!-- optional and const parameters -->
+	<property name="aws" value="aws" />
 	<property name="mvn" value="mvn" />
 	<property name="branch" value="master" />
 	<property name="deleteProperties" value="true" />
@@ -25,9 +23,7 @@
 
 	<!-- usage -->
 	<target name="help" description="print usage info">
-		<echo message="ant -f ../buildtools/build.xml -Dbasedir=. -DincrementalVersion=42 dist" />
-		<echo message="" />
-		<echo message="required: incrementalVersion" />
+		<echo message="ant -f ../buildtools/build.xml -Dbasedir=. dist" />
 	</target>
 
 	<!-- main CI task to be called by build environment -->
@@ -121,12 +117,40 @@
 			</condition>
 		</fail>
 
+		<!-- get incrementalVersion from DynamoDB -->
+		<condition property="isFetchIncrementalVersion">
+			<and>
+				<istrue value="${isDefaultBranch}" />
+				<not>
+					<isset property="incrementalVersion" />
+				</not>
+			</and>
+		</condition>
+		<property name="incrementalVersionKey" value="${project.groupId}:${project.artifactId}:${build.majorVersion}.${build.minorVersion}" />
+		<exec executable="${aws}" failonerror="true" outputproperty="incrementalVersion" error="/tmp/ant-error.log" if:set="isFetchIncrementalVersion">
+			<arg value="--region=eu-central-1" />
+			<arg value="dynamodb" />
+			<arg value="update-item" />
+			<arg value="--table-name=pipelines-versions" />
+			<arg value="--return-values=ALL_NEW" />
+			<arg value="--key={&quot;artifact&quot;: {&quot;S&quot;: &quot;${incrementalVersionKey}&quot;}}" />
+			<arg value="--expression-attribute-names={&quot;#V&quot;:&quot;version&quot;}" />
+			<arg value="--expression-attribute-values={&quot;:one&quot;: {&quot;N&quot;: &quot;1&quot;}}" />
+			<arg value="--update-expression=ADD #V :one" />
+			<arg value="--query=Attributes.version.N" />
+			<arg value="--output=text" />
+		</exec>
+		<echo message="fetched incrementalVersion ${incrementalVersion} for ${incrementalVersionKey}" if:set="isFetchIncrementalVersion" />
+		<echo message="use predefined incrementalVersion ${incrementalVersion} for ${incrementalVersionKey}" unless:set="isFetchIncrementalVersion" />
+
 		<!-- check for required properties -->
 		<fail message="incrementalVersion not set for default build">
 			<condition>
 				<and>
 					<istrue value="${isDefaultBranch}" />
-					<equals arg1="${incrementalVersion}" arg2="" trim="true" />
+					<not>
+						<isset property="incrementalVersion" />
+					</not>
 				</and>
 			</condition>
 		</fail>
