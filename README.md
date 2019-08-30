@@ -24,6 +24,9 @@ Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipeli
 - `BITBUCKET_REPO_SLUG` - slug of the repository name
 - `GIT_USER_NAME` - user name of a git user that has push access to the repository
 - `GIT_USER_EMAIL` - email of a git user that has push access to the repository
+- `NPM_REGISTRY_USER` - npm registry user
+- `NPM_REGISTRY_PASS` - npm registry password
+- `NPM_REGISTRY_EMAIL` - npm registry email
 
 
 ### Add bitbucket-pipelines.yml
