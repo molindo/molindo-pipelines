@@ -37,8 +37,13 @@ image: molindo/molindo-pipelines:cypress
 pipelines:
   default:
     - step:
+        caches:
+          - node
         script:
+          - . /etc/profile
           - initRepo.sh
+          - yarn install
+          - npm run lint
           - $(npm bin)/cypress verify
           - dockerBuild.sh
           - triggerBamboo.sh
