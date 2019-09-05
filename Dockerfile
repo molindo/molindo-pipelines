@@ -1,4 +1,4 @@
-FROM cypress/base:8
+FROM cypress/base:12.6.0
 
 RUN apt-get update \
         && apt-get install -y jshon python-pip python-dev \
