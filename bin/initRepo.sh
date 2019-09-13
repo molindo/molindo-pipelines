@@ -16,10 +16,10 @@ if [ -n "$SSH_KEY" ]; then
   echo "adding bitbucket.org as known host"
   ssh-keyscan -t rsa bitbucket.org >> ~/.ssh/known_hosts
 
-  echo "setting SSH remote URL"
+  echo "setting SSH remote URL ${BITBUCKET_GIT_SSH_ORIGIN}"
   git remote set-url origin ${BITBUCKET_GIT_SSH_ORIGIN?}
 else
-  echo "setting HTTP remote URL"
+  echo "setting HTTP remote URL ${BITBUCKET_GIT_HTTP_ORIGIN}"
   git remote set-url origin ${BITBUCKET_GIT_HTTP_ORIGIN?}
 fi
 
