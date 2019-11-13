@@ -1,4 +1,4 @@
-FROM atlassian/default-image:latest
+FROM node:12
 
 RUN apt-get update \
         && apt-get install -y jshon python-pip python-dev \
@@ -7,3 +7,4 @@ RUN apt-get update \
         && rm -rf /var/lib/apt/lists/*
 
 ADD bin /usr/local/bin
+ADD profile /etc/profile.d
