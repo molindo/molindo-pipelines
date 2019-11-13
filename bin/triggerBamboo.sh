@@ -8,6 +8,14 @@ if [ -z "${BITBUCKET_BRANCH}" ]; then
         exit 0
 fi
 
+export out=$( mktemp --tmpdir trigger.XXXXXX )
+function errorTrap {
+    echo "last output:"
+    cat $out
+    exit 255
+}
+trap errorTrap ERR
+
 # pipelines env
 branch=${BITBUCKET_BRANCH?}
 commit=${BITBUCKET_COMMIT?}
@@ -23,15 +31,15 @@ if [ "${branch}" = "master" ]; then
     branchKey=${plan}
 else
     echo "getting branch key for ${branch}"
-    branchKey=$( curl -s --user "${user}:${pass}" -H 'Accept: application/json' ${bamboo}/rest/api/latest/plan/${plan}/branch/${branch} | jshon -e key -u 2> /dev/null || echo "" )
+    branchKey=$( curl -s --user "${user}:${pass}" -H 'Accept: application/json' ${bamboo}/rest/api/latest/plan/${plan}/branch/${branch} | tee $out | jshon -e key -u 2> /dev/null || echo "" )
 
     if [ -z "${branchKey}" ]; then
             echo "creating new branch ${branch} of plan ${plan}"
-            branchKey=$( curl -s --user "${user}:${pass}" -H 'Accept: application/json' -XPUT "${bamboo}/rest/api/latest/plan/${plan}/branch/${branch}?vcsBranch=${branch}&enabled=true&cleanupEnabled=true" | jshon -e key -u )
+            branchKey=$( curl -s --user "${user}:${pass}" -H 'Accept: application/json' -XPUT "${bamboo}/rest/api/latest/plan/${plan}/branch/${branch}?vcsBranch=${branch}&enabled=true&cleanupEnabled=true" | tee $out | jshon -e key -u )
     fi
 fi
 
 echo "triggering build for ${commit} in ${branchKey} with user ${user}"
-resultKey=$(curl -s --user "${user}:${pass}" -H 'Accept: application/json' -XPOST ${bamboo}/rest/api/latest/queue/${branchKey}?customRevision=${commit} | jshon -e buildResultKey -u)
+resultKey=$(curl -s --user "${user}:${pass}" -H 'Accept: application/json' -XPOST ${bamboo}/rest/api/latest/queue/${branchKey}?customRevision=${commit} | tee $out | jshon -e buildResultKey -u)
 
 echo "queued build ${buildResultKey}"
