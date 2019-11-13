@@ -11,7 +11,7 @@ fi
 export out=$( mktemp --tmpdir trigger.XXXXXX )
 function errorTrap {
     echo "last output:"
-    cat $out >&2
+    cat $out
     exit 255
 }
 trap errorTrap ERR
