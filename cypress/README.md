@@ -1,4 +1,4 @@
-# molindo-pipelines
+# molindo-pipelines:cypress
 
 Container for use as Bitbucket Pipelines image
 

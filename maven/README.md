@@ -1,4 +1,4 @@
-# molindo-pipelines
+# molindo-pipelines:maven
 
 Container for use as Bitbucket Pipelines image
 
@@ -31,7 +31,10 @@ Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipeli
 For libraries:
 
 ```yml
-image: molindo/molindo-pipelines:maven-3-jdk-8
+image: molindo/molindo-pipelines:maven
+
+clone:
+  depth: full
 
 pipelines:
   default:
@@ -46,7 +49,7 @@ pipelines:
 For containers:
 
 ```yml
-image: molindo/molindo-pipelines:maven-3-jdk-8
+image: molindo/molindo-pipelines:maven
 
 clone:
   depth: full

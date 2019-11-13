@@ -1,4 +1,4 @@
-# molindo-pipelines
+# molindo-pipelines:nodejs
 
 Container for use as Bitbucket Pipelines image
 
@@ -40,7 +40,7 @@ Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipeli
 ### Add bitbucket-pipelines.yml
 
 ```yml
-image: molindo/molindo-pipelines:nodejs-7
+image: molindo/molindo-pipelines:nodejs
 
 pipelines:
   default:
