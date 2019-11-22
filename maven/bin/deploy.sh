@@ -12,9 +12,4 @@ if [ "$USE_DYNAMO_DB" != true ]; then
     args="-DincrementalVersion=${BITBUCKET_BUILD_NUMBER?}"
 fi
 
-ant -f /usr/local/bin/build.xml -Dbasedir=. \
-  -Dgit.branch=${branch} \
-  -Dgit.origin=`git remote get-url origin` \
-  -Dmvn=/usr/bin/mvn \
-  -Daws=/usr/local/bin/aws \
-  $args dist
+ant -f /usr/local/bin/build.xml -Dbasedir=. -Dgit.branch=${branch} -Dmvn=/usr/bin/mvn -Daws=/usr/local/bin/aws $args dist
