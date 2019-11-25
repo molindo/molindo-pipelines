@@ -213,6 +213,7 @@
 			<arg value="-Dscm.checkLocalModification.skip=${isFeatureBranch}" />
 			<arg value="scm:tag" />
 			<arg value="-DpushChanges=${pushChanges}" />
+			<arg value="-DdeveloperConnectionUrl=scm:git:${git.remote.origin.url}" if:set="git.remote.origin.url" />
 			<arg value="-Dtag=${version}" />
 		</exec>
 		<antcall target="setVersion">
@@ -255,6 +256,7 @@
 			<arg value="scm:checkin" />
 			<arg value="-Dmessage=${defaultBuildtoolFilter} updated internal dependencies" />
 			<arg value="-DpushChanges=${pushChanges}" />
+			<arg value="-DdeveloperConnectionUrl=scm:git:${git.remote.origin.url}" if:set="git.remote.origin.url" />
 		</exec>
 	</target>
 
