@@ -6,7 +6,7 @@
 	- parent SHOULD be latest molindo-private-pom
 	- version MUST be in the form of *.*.9999-SNAPSHOT
 	- <scm> MUST is propertly configured (including write access)
-	- pom-versioned.xml SHOULD be in .gitignore
+	- container-tags.txt SHOULD be in .gitignore
 -->
 <project name="Build config" default="help" xmlns:if="ant:if" xmlns:unless="ant:unless">
 
@@ -18,8 +18,8 @@
 	<property name="pushChanges" value="true" />
 	<property name="defaultIncrementalVersion" value="9999" />
 	<property name="defaultQualifier" value="SNAPSHOT" />
-	<property name="defaultCopiedPOMFilename" value="pom-versioned.xml" />
 	<property name="defaultBuildtoolFilter" value="[Buildtool]" />
+	<property name="containerTagFileName" value="container-tags.txt" />
 
 	<!-- usage -->
 	<target name="help" description="print usage info">
@@ -36,19 +36,24 @@
 	<target name="buildDefault" if="isDefaultBranch">
 		<echo message="triggering CI build for default branch ${git.branch}" />
 
-		<antcall target="tagAndSetVersion">
+		<antcall target="setVersion">
 			<param name="version" value="${build.version.release}" />
 		</antcall>
 
-		<antcall target="copyPOM" />
+		<antcall target="build" />
 
-		<antcall target="deploy" />
+		<antcall target="writeContainerTags" />
 
 		<antcall target="setVersion">
 			<param name="version" value="${build.version.default}" />
 		</antcall>
 
+		<antcall target="tagVersion">
+			<param name="version" value="${build.version.release}" />
+		</antcall>
+
 		<antcall target="updateAndPushDependencies" />
+
 	</target>
 
 	<!-- actions to be executed when operating within a development branch -->
@@ -59,13 +64,14 @@
 			<param name="version" value="${build.version.release}" />
 		</antcall>
 
-		<antcall target="copyPOM" />
+		<antcall target="build" />
 
-		<antcall target="deploy" />
+		<antcall target="writeContainerTags" />
 
 		<antcall target="setVersion">
 			<param name="version" value="${build.version.default}" />
 		</antcall>
+
 	</target>
 
 	<!-- load properties from POM -->
@@ -116,6 +122,11 @@
 				</not>
 			</condition>
 		</fail>
+
+		<!-- check if we're building a docker image -->
+		<available property="isServiceBuild" file="src/main/docker/Dockerfile" unless:set="${isServiceBuild}" />
+		<echo message="this is a service build" if:set="isServiceBuild" />
+		<echo message="this is a library build" unless:set="isServiceBuild" />
 
 		<!-- get incrementalVersion from DynamoDB -->
 		<condition property="isFetchIncrementalVersion">
@@ -189,8 +200,14 @@
 		<echo message="releasing version ${build.version.release} from ${build.version.default}" />
 	</target>
 
+	<!-- deploy or verify Maven artifact -->
+	<target name="build" description="deploy or verify Maven project">
+		<antcall target="deploy" />
+		<antcall target="verify" />
+	</target>
+
 	<!-- deploy Maven artifact -->
-	<target name="deploy">
+	<target name="deploy" unless="isServiceBuild">
 		<echo message="deploying maven artifact" />
 		<exec executable="${mvn}" failonerror="true">
 			<arg value="--batch-mode" />
@@ -203,8 +220,21 @@
 		</exec>
 	</target>
 
+	<!-- verify Maven artifact -->
+	<target name="verify" if="isServiceBuild">
+		<echo message="deploying maven artifact" />
+		<exec executable="${mvn}" failonerror="true">
+			<arg value="--batch-mode" />
+			<arg value="--settings=settings.xml" />
+			<arg value="-Ddeployment=true" />
+			<arg value="--update-snapshots" />
+			<arg value="clean" />
+			<arg value="verify" />
+		</exec>
+	</target>
+
 	<!-- tag and set version ${version} -->
-	<target name="tagAndSetVersion">
+	<target name="tagVersion">
 		<echo message="tagging version ${version}" />
 		<exec executable="${mvn}" failonerror="true">
 			<arg value="--batch-mode" />
@@ -216,9 +246,6 @@
 			<arg value="-DdeveloperConnectionUrl=scm:git:${git.remote.origin.url}" if:set="git.remote.origin.url" />
 			<arg value="-Dtag=${version}" />
 		</exec>
-		<antcall target="setVersion">
-			<param name="version" value="${version}" />
-		</antcall>
 	</target>
 
 	<!-- set version ${version} -->
@@ -230,11 +257,6 @@
 			<arg value="versions:set" />
 			<arg value="-DnewVersion=${version}" />
 		</exec>
-	</target>
-
-	<!-- create a backup copy of the versioned pom -->
-	<target name="copyPOM">
-		<copy file="pom.xml" tofile="${defaultCopiedPOMFilename}" failonerror="true" />
 	</target>
 
 	<!-- check if there are updated libraries we're referencing and push the update -->
@@ -258,6 +280,12 @@
 			<arg value="-DpushChanges=${pushChanges}" />
 			<arg value="-DdeveloperConnectionUrl=scm:git:${git.remote.origin.url}" if:set="git.remote.origin.url" />
 		</exec>
+	</target>
+
+	<!-- write container tags ${tags} -->
+	<target name="writeContainerTags" if="isServiceBuild">
+		<!-- TODO use ${build.version.tag} instead after fully migrating bamboo -->
+		<echo file="${containerTagFileName}" append="false">${project.artifactId}:${git.commit.id}</echo>
 	</target>
 
 </project>
