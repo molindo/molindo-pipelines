@@ -10,7 +10,14 @@ commit=${BITBUCKET_COMMIT?}
 # required variables
 registry=${MOLINDO_DOCKER_REGISTRY?}
 
-target=$registry/$slug:$commit
+# optional variables
+tags=${CONTAINER_TAGS:-container-tags.txt}
+
+target=$slug:$commit
+
+if [ -n -e $tags ]; then
+	echo -n $registry/$target > $tags
+fi
 
 # ECR login
 if [ `echo $registry | grep 'ecr\.[^.]*\.amazonaws\.com$'` ]; then
@@ -26,5 +33,10 @@ fi
 echo "building $target"
 docker build -t $target .
 
-echo "pushing $target"
-docker push $target
+while read tag; do
+	if [ -n "$tag"]; then
+		echo "pushing $registry/$tag"
+		docker tag $target $registry/$tag
+		docker push $registry/$tag
+	fi
+done < $tags

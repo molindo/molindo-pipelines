@@ -19,7 +19,7 @@
 	<property name="defaultIncrementalVersion" value="9999" />
 	<property name="defaultQualifier" value="SNAPSHOT" />
 	<property name="defaultBuildtoolFilter" value="[Buildtool]" />
-	<property name="containerTagFileName" value="container-tags.txt" />
+	<property name="containerTagsFileName" value="container-tags.txt" />
 
 	<!-- usage -->
 	<target name="help" description="print usage info">
@@ -285,7 +285,7 @@
 	<!-- write container tags ${tags} -->
 	<target name="writeContainerTags" if="isServiceBuild">
 		<!-- TODO use ${build.version.tag} instead after fully migrating bamboo -->
-		<echo file="${containerTagFileName}" append="false">${project.artifactId}:${git.commit.id}</echo>
+		<echo file="${containerTagsFileName}" append="false">${project.artifactId}:${git.commit.id}</echo>
 	</target>
 
 </project>
