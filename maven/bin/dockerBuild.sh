@@ -46,6 +46,6 @@ while read tag; do
 	fi
 done < $tags
 
-if [ -n "$branch"]; then
+if [ -n "$branch" ]; then
 	aws s3api put-object --bucket $bucket --key artifacts/${branch}/${slug}-container-tags.txt --body ${tags}
 fi
