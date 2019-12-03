@@ -13,6 +13,9 @@ registry=${MOLINDO_DOCKER_REGISTRY?}
 # optional variables
 tags=${CONTAINER_TAGS:-container-tags.txt}
 
+# optional args
+path=${1:-.}
+
 target=$slug:$commit
 
 if [ -n -e $tags ]; then
@@ -31,7 +34,7 @@ if [ `echo $registry | grep 'ecr\.[^.]*\.amazonaws\.com$'` ]; then
 fi
 
 echo "building $target"
-docker build -t $target .
+docker build -t $target $path
 
 while read tag; do
 	if [ -n "$tag"]; then

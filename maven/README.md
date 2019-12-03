@@ -62,8 +62,7 @@ pipelines:
         script:
           - initRepo.sh
           - deploy.sh
-          - cd target/
-          - dockerBuild.sh
+          - dockerBuild.sh target/
           - triggerBamboo.sh
         artifacts:
           - container-tags.txt
