@@ -24,7 +24,10 @@ path=${1:-.}
 
 target=$slug:$commit
 
-if [ ! -e $tags ]; then
+if [ -e $tags ]; then
+	echo "using existing $tags"
+else
+	echo "generating default $tags"
 	echo -n $registry/$target > $tags
 fi
 
@@ -49,5 +52,6 @@ cat $tags | while read tag || [ -n "$tag" ]; do
 done
 
 if [ -n "$branch" ]; then
+	echo "uploading $tags to $bucket as artifacts/${branch}/${slug}-container-tags.txt"
 	aws s3api put-object --bucket $bucket --key artifacts/${branch}/${slug}-container-tags.txt --body ${tags}
 fi
