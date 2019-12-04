@@ -24,7 +24,7 @@ path=${1:-.}
 
 target=$slug:$commit
 
-if [ -n -e $tags ]; then
+if [ ! -e $tags ]; then
 	echo -n $registry/$target > $tags
 fi
 
