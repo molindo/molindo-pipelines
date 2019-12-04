@@ -61,10 +61,11 @@ pipelines:
           - maven
         script:
           - initRepo.sh
-          - maven clean verify
-          - cd target/
-          - dockerBuild.sh
+          - deploy.sh
+          - dockerBuild.sh target/
           - triggerBamboo.sh
+        artifacts:
+          - container-tags.txt
 
 options:
   docker: true
