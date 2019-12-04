@@ -38,13 +38,15 @@ fi
 echo "building $target"
 docker build -t $target $path
 
-while read tag; do
-	if [ -n "$tag"]; then
+cat $tags
+
+cat $tags | while read tag || [ -n "$tag" ]; do
+	if [ -n "$tag" ]; then
 		echo "pushing $registry/$tag"
 		docker tag $target $registry/$tag
 		docker push $registry/$tag
 	fi
-done < $tags
+done
 
 if [ -n "$branch" ]; then
 	aws s3api put-object --bucket $bucket --key artifacts/${branch}/${slug}-container-tags.txt --body ${tags}
