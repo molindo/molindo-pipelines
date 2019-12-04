@@ -47,6 +47,8 @@ pipelines:
           - $(npm bin)/cypress verify
           - dockerBuild.sh
           - triggerBamboo.sh
+        artifacts:
+          - container-tags.txt
 
 options:
   docker: true

@@ -52,6 +52,8 @@ pipelines:
           - npm run build
           - dockerBuild.sh
           - triggerBamboo.sh
+        artifacts:
+          - container-tags.txt
 
 options:
   docker: true
