@@ -28,7 +28,7 @@ if [ -e $tags ]; then
 	echo "using existing $tags"
 else
 	echo "generating default $tags"
-	echo -n $registry/$target > $tags
+	echo -n $target > $tags
 fi
 
 # ECR login
