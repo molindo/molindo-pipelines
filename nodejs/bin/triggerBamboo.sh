@@ -22,7 +22,8 @@ commit=${BITBUCKET_COMMIT?}
 
 # required variables
 bamboo=${BAMBOO_ROOT?}
-plan=${BAMBOO_PLAN?}
+plan=${BAMBOO_PLAN:-${BAMBOO_CHILD_PLAN?}}
+child=${BAMBOO_CHILD_PLAN}
 user=${BAMBOO_USER?}
 pass=${BAMBOO_PASS?}
 
@@ -34,12 +35,22 @@ else
     branchKey=$( curl -s --user "${user}:${pass}" -H 'Accept: application/json' ${bamboo}/rest/api/latest/plan/${plan}/branch/${branch} | tee $out | jshon -e key -u 2> /dev/null || echo "" )
 
     if [ -z "${branchKey}" ]; then
+        if [ "${plan}" = "${child}" ]; then
+            echo "not triggering unknown branch in child plan ${plan}"
+            exit
+        else
             echo "creating new branch ${branch} of plan ${plan}"
             branchKey=$( curl -s --user "${user}:${pass}" -H 'Accept: application/json' -XPUT "${bamboo}/rest/api/latest/plan/${plan}/branch/${branch}?vcsBranch=${branch}&enabled=true&cleanupEnabled=true" | tee $out | jshon -e key -u )
+        fi
     fi
 fi
 
-echo "triggering build for ${commit} in ${branchKey} with user ${user}"
-resultKey=$(curl -s --user "${user}:${pass}" -H 'Accept: application/json' -XPOST ${bamboo}/rest/api/latest/queue/${branchKey}?customRevision=${commit} | tee $out | jshon -e buildResultKey -u)
+if [ "${plan}" = "${child}" ]; then
+    echo "triggering build in ${branchKey} with user ${user}"
+    resultKey=$(curl -s --user "${user}:${pass}" -H 'Accept: application/json' -XPOST ${bamboo}/rest/api/latest/queue/${branchKey} | tee $out | jshon -e buildResultKey -u)
+else
+    echo "triggering build for ${commit} in ${branchKey} with user ${user}"
+    resultKey=$(curl -s --user "${user}:${pass}" -H 'Accept: application/json' -XPOST ${bamboo}/rest/api/latest/queue/${branchKey}?customRevision=${commit} | tee $out | jshon -e buildResultKey -u)
+fi
 
 echo "queued build ${buildResultKey}"
