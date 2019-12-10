@@ -285,7 +285,7 @@
 	<!-- write container tags -->
 	<target name="writeContainerTags" if="isServiceBuild">
 		<condition property="build.latest.tag" value="latest" else="${git.branch}">
-			<istrue id="isDefaultBranch" />
+			<istrue value="${isDefaultBranch}" />
 		</condition>
 		<echo file="${containerTagsFileName}" append="false">${project.artifactId}:${build.version.tag}${line.separator}${project.artifactId}:${build.latest.tag}${line.separator}</echo>
 	</target>
