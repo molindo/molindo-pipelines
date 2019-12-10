@@ -282,10 +282,12 @@
 		</exec>
 	</target>
 
-	<!-- write container tags ${tags} -->
+	<!-- write container tags -->
 	<target name="writeContainerTags" if="isServiceBuild">
-		<!-- TODO use ${build.version.tag} instead after fully migrating bamboo -->
-		<echo file="${containerTagsFileName}" append="false">${project.artifactId}:${git.commit.id}${line.separator}</echo>
+		<condition property="build.latest.tag" value="latest" else="${git.branch}">
+			<istrue id="isDefaultBranch" />
+		</condition>
+		<echo file="${containerTagsFileName}" append="false">${project.artifactId}:${build.version.tag}${line.separator}${project.artifactId}:${build.latest.tag}${line.separator}</echo>
 	</target>
 
 </project>
