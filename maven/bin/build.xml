@@ -174,15 +174,9 @@
 		<condition property="build.version.release" value="${build.majorVersion}.${build.minorVersion}.${incrementalVersion}">
 			<istrue value="${isDefaultBranch}" />
 		</condition>
-		<condition property="build.version.tag" value="${build.version.release}">
-			<istrue value="${isDefaultBranch}" />
-		</condition>
 
 		<!-- set feature branch properties -->
 		<condition property="build.version.release" value="${build.majorVersion}.${build.minorVersion}.${defaultIncrementalVersion}-${git.branch}-${defaultQualifier}">
-			<istrue value="${isFeatureBranch}" />
-		</condition>
-		<condition property="build.version.tag" value="${build.majorVersion}.${build.minorVersion}.${defaultIncrementalVersion}-${git.branch}-${incrementalVersion}">
 			<istrue value="${isFeatureBranch}" />
 		</condition>
 
@@ -284,10 +278,8 @@
 
 	<!-- write container tags -->
 	<target name="writeContainerTags" if="isServiceBuild">
-		<condition property="build.latest.tag" value="latest" else="${git.branch}">
-			<istrue value="${isDefaultBranch}" />
-		</condition>
-		<echo file="${containerTagsFileName}" append="false">${project.artifactId}:${build.version.tag}${line.separator}${project.artifactId}:${build.latest.tag}${line.separator}</echo>
+		<echo file="${containerTagsFileName}" append="false" if:set="isDefaultBranch">${project.artifactId}:${build.version.release}${line.separator}${project.artifactId}:latest${line.separator}</echo>
+		<echo file="${containerTagsFileName}" append="false" if:set="isFeatureBranch">${project.artifactId}:${git.commit.id}${line.separator}${project.artifactId}:${git.branch}${line.separator}</echo>
 	</target>
 
 </project>
