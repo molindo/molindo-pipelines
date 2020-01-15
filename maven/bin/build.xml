@@ -82,6 +82,7 @@
 		<exec executable="${mvn}" failonerror="true">
 			<arg value="--batch-mode" />
 			<arg value="--settings=settings.xml" />
+			<arg value="--projects=." />
 			<arg value="-Ddeployment=true" />
 			<arg value="-Dbuild.properties=${build.properties}" />
 			<arg value="initialize" />
