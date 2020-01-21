@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 # generate container-tags file for non-maven jobs (e.g. docker-only builds)
 
