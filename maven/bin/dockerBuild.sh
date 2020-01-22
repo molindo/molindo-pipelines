@@ -52,6 +52,7 @@ cat $tags | while read tag || [ -n "$tag" ]; do
 done
 
 if [ -n "$branch" ]; then
-	echo "uploading $tags to $bucket as artifacts/${branch}/${slug}-container-tags.txt"
-	aws s3api put-object --bucket $bucket --key artifacts/${branch}/${slug}-container-tags.txt --body ${tags}
+	name=`head -n1 $tags | cut -d: -f1`
+	echo "uploading $tags to $bucket as artifacts/${branch}/${name}-container-tags.txt"
+	aws s3api put-object --bucket $bucket --key artifacts/${branch}/${name}-container-tags.txt --body ${tags}
 fi
