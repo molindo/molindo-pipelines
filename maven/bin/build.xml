@@ -49,7 +49,7 @@
 		</antcall>
 
 		<antcall target="tagVersion">
-			<param name="version" value="${build.version.release}" />
+			<param name="version" value="${project.artifactId}-${build.version.release}" />
 		</antcall>
 
 		<antcall target="updateAndPushDependencies" />
