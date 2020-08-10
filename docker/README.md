@@ -34,11 +34,15 @@ Built and [hosted on Docker Hub](https://hub.docker.com/r/molindo/molindo-pipeli
 ### Add bitbucket-pipelines.yml
 
 ```yml
-image: molindo/molindo-pipelines:maven
+image: molindo/molindo-pipelines:docker
 
 pipelines:
   default:
     - step:
+        services:
+          - docker
+        caches:
+          - docker
         script:
           - initRepo.sh
           - generateContainerTags.sh
@@ -46,7 +50,4 @@ pipelines:
           - triggerBamboo.sh
         artifacts:
           - container-tags.txt
-
-options:
-  docker: true
 ```
