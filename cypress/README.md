@@ -45,6 +45,7 @@ pipelines:
         script:
           - . /etc/profile
           - initRepo.sh
+          - generateContainerTags.sh
           - yarn install
           - npm run lint
           - $(npm bin)/cypress verify

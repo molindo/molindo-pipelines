@@ -53,6 +53,7 @@ pipelines:
         script:
           - . /etc/profile
           - initRepo.sh
+          - generateContainerTags.sh
           - yarn install
           - npm run build
           - dockerBuild.sh
