@@ -125,7 +125,11 @@
 		</fail>
 
 		<!-- check if we're building a docker image -->
-		<available property="isServiceBuild" file="src/main/docker/Dockerfile" unless:set="${isServiceBuild}" />
+		<condition property="isServiceBuild">
+			<resourcecount when="greater" count="0">
+				<fileset dir="." includes="**/src/main/docker/Dockerfile" />
+			</resourcecount>
+		</condition>
 		<echo message="this is a service build" if:set="isServiceBuild" />
 		<echo message="this is a library build" unless:set="isServiceBuild" />
 
