@@ -125,7 +125,11 @@
 		</fail>
 
 		<!-- check if we're building a docker image -->
-		<available property="isServiceBuild" file="src/main/docker/Dockerfile" unless:set="${isServiceBuild}" />
+		<condition property="isServiceBuild">
+			<resourcecount when="greater" count="0">
+				<fileset dir="." includes="**/src/main/docker/Dockerfile" />
+			</resourcecount>
+		</condition>
 		<echo message="this is a service build" if:set="isServiceBuild" />
 		<echo message="this is a library build" unless:set="isServiceBuild" />
 
@@ -279,8 +283,15 @@
 
 	<!-- write container tags -->
 	<target name="writeContainerTags" if="isServiceBuild">
-		<echo file="${containerTagsFileName}" append="false" if:set="isDefaultBranch">${project.artifactId}:${build.version.release}${line.separator}${project.artifactId}:latest${line.separator}</echo>
-		<echo file="${containerTagsFileName}" append="false" if:set="isFeatureBranch">${project.artifactId}:${git.commit.id}${line.separator}${project.artifactId}:${git.branch}${line.separator}</echo>
+		<condition property="containerTags" value="${project.artifactId}:${build.version.release}${line.separator}${project.artifactId}:latest">
+			<istrue value="${isDefaultBranch}" />
+		</condition>
+		<condition property="containerTags" value="${project.artifactId}:${git.commit.id}${line.separator}${project.artifactId}:${git.branch}">
+			<istrue value="${isFeatureBranch}" />
+		</condition>
+
+		<echo>writing file ${containerTagsFileName}:${line.separator}${containerTags}</echo>
+		<echo file="${containerTagsFileName}" append="false">${containerTags}${line.separator}</echo>
 	</target>
 
 </project>
