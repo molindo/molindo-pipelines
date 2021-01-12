@@ -53,8 +53,11 @@ done
 
 if [ -n "$branch" ]; then
 	name=`head -n1 $tags | cut -d: -f1`
-	grep --quiet ':latest' container-tags.txt && branch=master
 
-	echo "uploading $tags to $bucket as artifacts/${branch}/${name}-container-tags.txt"
-	aws s3api put-object --bucket $bucket --key artifacts/${branch}/${name}-container-tags.txt --body ${tags}
+	location=branch/$branch
+	# set location to master if :latest
+	grep --quiet ':latest' container-tags.txt && location=master
+
+	echo "uploading $tags to $bucket as artifacts/${location}/${name}-container-tags.txt"
+	aws s3api put-object --bucket $bucket --key artifacts/${location}/${name}-container-tags.txt --body ${tags}
 fi
