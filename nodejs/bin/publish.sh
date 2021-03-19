@@ -44,11 +44,11 @@ fi
 echo "incrementing version from $version to $newVersion"
 
 # write new version to package.json
-npm --no-git-tag-version version $newVersion
+npm --no-git-tag-version version $newVersion --no-progress
 
 # publish
 tag=$([ $isDefaultBranch == true ] && echo "latest" || echo "prerelease")
-npm publish --tag $tag
+npm publish --tag $tag --no-progress
 
 # tag release
 if [ $isDefaultBranch == true ]; then
